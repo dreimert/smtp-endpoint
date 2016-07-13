@@ -5,7 +5,6 @@ SERVER_PORT = 2525
 SERVER_HOST = '0.0.0.0'
 
 server = new SMTPServer
-  logger: true
   banner: 'Welcome to My Awesome SMTP Server'
   disabledCommands: ['STARTTLS']
   authMethods: ['PLAIN', 'LOGIN', 'CRAM-MD5']
@@ -22,16 +21,12 @@ server = new SMTPServer
     return callback(new Error('Authentication failed'))
 
   onMailFrom: (address, session, callback) ->
-    console.log "onMailFrom", address, session
-
     if /^deny/i.test(address.address)
       return callback(new Error('Not accepted'))
     callback()
     return
 
   onRcptTo: (address, session, callback) ->
-    console.log "onRcptTo", address, session
-
     if /^deny/i.test(address.address)
       return callback(new Error('Not accepted'))
 
@@ -47,11 +42,10 @@ server = new SMTPServer
     return
 
   onData: (stream, session, callback) ->
-    console.log "onData"
     mailparser = new MailParser()
 
     mailparser.on "end", (mail_object) ->
-      console.log("mail_object:", mail_object)
+      console.log("mail_object:", JSON.stringify mail_object, null, 2)
 
     stream.pipe mailparser
 
@@ -62,7 +56,6 @@ server = new SMTPServer
         return callback(err)
       callback(null, 'Message queued as abcdef')
       return
-
 
 server.on 'error', (err) ->
   console.error('Error occurred')
