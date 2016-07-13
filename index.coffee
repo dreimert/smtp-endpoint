@@ -48,23 +48,21 @@ server = new SMTPServer
 
   onData: (stream, session, callback) ->
     console.log "onData"
-    stream.pipe(process.stdout)
+    mailparser = new MailParser(debug: true)
+
+    mailparser.on "end", (mail_object) ->
+      console.log("From:", mail_object.from)
+      console.log("Subject:", mail_object.subject)
+      console.log("Text body:", mail_object.text)
+
+    stream.pipe mailparser
+
     stream.on 'end', ->
       if stream.sizeExceeded
         err = new Error('Error: message exceeds fixed maximum message size 25 MB')
         err.responseCode = 552
         return callback(err)
       callback(null, 'Message queued as abcdef')
-
-      mailparser = new MailParser(debug: true)
-
-      mailparser.on "end", (mail_object) ->
-        console.log("From:", mail_object.from)
-        console.log("Subject:", mail_object.subject)
-        console.log("Text body:", mail_object.text)
-
-      stream.pipe mailparser
-
       return
 
 
