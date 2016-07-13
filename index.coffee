@@ -1,5 +1,6 @@
 SMTPServer = require('smtp-server').SMTPServer
 MailParser = require("mailparser").MailParser
+fs = require('fs')
 
 SERVER_PORT = 2525
 SERVER_HOST = '0.0.0.0'
@@ -45,7 +46,13 @@ server = new SMTPServer
     mailparser = new MailParser()
 
     mailparser.on "end", (mail_object) ->
-      console.log("mail_object:", JSON.stringify mail_object, null, 2)
+      time = String(new Date().getTime())
+      filename = time + "_" + Math.floor(Math.random()*1000)
+      content = JSON.stringify(mail_object, null, 2)
+      fs.writeFile filename, content, 'utf8', (err) ->
+        if err
+          throw err
+        console.log('mail save as ', filename)
 
     stream.pipe mailparser
 
