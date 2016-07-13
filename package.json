@@ -1,0 +1,22 @@
+{
+  "name": "smtp-endpoint",
+  "version": "1.0.0",
+  "description": "Serveur smtp for only received mails",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dreimert/smtp-endpoint.git"
+  },
+  "author": "Damien Reimert",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dreimert/smtp-endpoint/issues"
+  },
+  "homepage": "https://github.com/dreimert/smtp-endpoint#readme",
+  "dependencies": {
+    "smtp-server": "^1.11.1"
+  }
+}
