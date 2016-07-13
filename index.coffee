@@ -1,4 +1,5 @@
 SMTPServer = require('smtp-server').SMTPServer
+MailParser = require("mailparser").MailParser
 
 SERVER_PORT = 2525
 SERVER_HOST = '0.0.0.0'
@@ -21,7 +22,7 @@ server = new SMTPServer
     return callback(new Error('Authentication failed'))
 
   onMailFrom: (address, session, callback) ->
-    console.log "onMailFrom", address, session, callback
+    console.log "onMailFrom", address, session
 
     if /^deny/i.test(address.address)
       return callback(new Error('Not accepted'))
@@ -29,7 +30,7 @@ server = new SMTPServer
     return
 
   onRcptTo: (address, session, callback) ->
-    console.log "onRcptTo", address, session, callback
+    console.log "onRcptTo", address, session
 
     if /^deny/i.test(address.address)
       return callback(new Error('Not accepted'))
@@ -54,6 +55,16 @@ server = new SMTPServer
         err.responseCode = 552
         return callback(err)
       callback(null, 'Message queued as abcdef')
+
+      mailparser = new MailParser(debug: true)
+
+      mailparser.on "end", (mail_object) ->
+        console.log("From:", mail_object.from)
+        console.log("Subject:", mail_object.subject)
+        console.log("Text body:", mail_object.text)
+
+      stream.pipe mailparser
+
       return
 
 

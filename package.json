@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/dreimert/smtp-endpoint#readme",
   "dependencies": {
+    "mailparser": "^0.6.1",
     "smtp-server": "^1.11.1"
   }
 }
