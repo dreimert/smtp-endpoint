@@ -48,12 +48,10 @@ server = new SMTPServer
 
   onData: (stream, session, callback) ->
     console.log "onData"
-    mailparser = new MailParser(debug: true)
+    mailparser = new MailParser()
 
     mailparser.on "end", (mail_object) ->
-      console.log("From:", mail_object.from)
-      console.log("Subject:", mail_object.subject)
-      console.log("Text body:", mail_object.text)
+      console.log("mail_object:", mail_object)
 
     stream.pipe mailparser
 
