@@ -6,6 +6,7 @@ SERVER_PORT = 2525
 SERVER_HOST = '0.0.0.0'
 
 server = new SMTPServer
+  logger: true
   banner: 'Welcome to My Awesome SMTP Server'
   disabledCommands: ['STARTTLS']
   authMethods: ['PLAIN', 'LOGIN', 'CRAM-MD5']

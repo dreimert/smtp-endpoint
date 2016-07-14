@@ -4,7 +4,10 @@
   "description": "Serveur smtp for only received mails",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "coffee index.coffee",
+    "dev": "nodemon index.coffee",
+    "sendMail": "coffee send.coffee"
   },
   "repository": {
     "type": "git",
@@ -20,5 +23,9 @@
     "mailparser": "^0.6.1",
     "nodemailer": "^2.5.0",
     "smtp-server": "^1.11.1"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.10.0",
+    "nodemon": "^1.9.2"
   }
 }
