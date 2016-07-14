@@ -2,7 +2,6 @@ SMTPServer = require('smtp-server').SMTPServer
 MailParser = require("mailparser").MailParser
 fs = require('mz/fs')
 path = require 'path'
-PassThrough = require('stream').PassThrough
 
 config = require './config'
 
@@ -37,31 +36,41 @@ server = new SMTPServer
     return
 
   onData: (stream, session, callback) ->
-    mailparser = new MailParser()
-    raw = PassThrough()
+    mailparser = new MailParser(streamAttachments: true)
 
-    mailparser.on "end", (mail_object) ->
+    mailparser.on "end", (mail) ->
       filenameJson = path.format
         dir: config.mails.dir
-        name: mail_object.messageId
+        name: mail.messageId
         ext: ".json"
-      filenameRaw = path.format
-        dir: config.mails.dir
-        name: mail_object.messageId
-        ext: ".raw"
 
-      content = JSON.stringify(mail_object, null, 2)
+      content = JSON.stringify(mail, null, 2)
 
       fs.writeFile filenameJson, content, 'utf8'
       .then ->
-        console.log('mail save as ', mail_object.messageId)
+        console.log('mail save as ', mail.messageId)
       .catch (err) ->
         console.error "writeFile", err, err.stack
 
-      rawFile = fs.createWriteStream(filenameRaw)
-      raw.pipe rawFile
+    mailparser.on "attachment", (attachment, mail) ->
+      console.log "attachment", attachment, mail
+      dirname = path.format
+        dir: config.mails.dir
+        name: mail.messageId
+        ext: ".attachments"
 
-    stream.pipe raw
+      fs.mkdir(dirname)
+      .then ->
+        filename = path.format
+          dir: dirname
+          base: attachment.generatedFileName
+        console.log "filename", filename
+        fs.writeFile filename, attachment.content
+        .then ->
+          console.log('attachment save as ', filename)
+        .catch (err) ->
+          console.error "writeFile::attachment", err, err.stack
+
     stream.pipe mailparser
 
     stream.on 'end', ->
