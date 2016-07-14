@@ -1,6 +1,8 @@
 SMTPServer = require('smtp-server').SMTPServer
 MailParser = require("mailparser").MailParser
-fs = require('fs')
+fs = require('mz/fs')
+path = require 'path'
+PassThrough = require('stream').PassThrough
 
 config = require './config'
 
@@ -36,16 +38,30 @@ server = new SMTPServer
 
   onData: (stream, session, callback) ->
     mailparser = new MailParser()
+    raw = PassThrough()
 
     mailparser.on "end", (mail_object) ->
-      time = String(new Date().getTime())
-      filename = time + "_" + Math.floor(Math.random()*1000)
-      content = JSON.stringify(mail_object, null, 2)
-      fs.writeFile filename, content, 'utf8', (err) ->
-        if err
-          throw err
-        console.log('mail save as ', filename)
+      filenameJson = path.format
+        dir: config.mails.dir
+        name: mail_object.messageId
+        ext: ".json"
+      filenameRaw = path.format
+        dir: config.mails.dir
+        name: mail_object.messageId
+        ext: ".raw"
 
+      content = JSON.stringify(mail_object, null, 2)
+
+      fs.writeFile filenameJson, content, 'utf8'
+      .then ->
+        console.log('mail save as ', mail_object.messageId)
+      .catch (err) ->
+        console.error "writeFile", err, err.stack
+
+      rawFile = fs.createWriteStream(filenameRaw)
+      raw.pipe rawFile
+
+    stream.pipe raw
     stream.pipe mailparser
 
     stream.on 'end', ->

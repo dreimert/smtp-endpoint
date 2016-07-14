@@ -21,5 +21,8 @@
       "login": "testuser",
       "password":"testpass"
     }
+  },
+  "mails": {
+    "dir": "./mails"
   }
 }
