@@ -2,44 +2,35 @@ SMTPServer = require('smtp-server').SMTPServer
 MailParser = require("mailparser").MailParser
 fs = require('fs')
 
-SERVER_PORT = 2525
-SERVER_HOST = '0.0.0.0'
+config = require './config'
 
 server = new SMTPServer
   logger: true
-  banner: 'Welcome to My Awesome SMTP Server'
+  banner: config.server.banner
   disabledCommands: ['STARTTLS']
   authMethods: ['PLAIN', 'LOGIN', 'CRAM-MD5']
   size: 25 * 1024 * 1024
   authOptional: true
   onAuth: (auth, session, callback) ->
     console.log "onAuth", auth, session, callback
-    username = 'testuser'
-    password = 'testpass'
 
-    if auth.username is username
-      if (auth.method is 'CRAM-MD5' and auth.validatePassword(password)) or auth.password is password
+    if auth.username is config.test.user.login
+      if(
+        (auth.method is 'CRAM-MD5' and auth.validatePassword(password)) or
+        auth.password is config.test.user.password
+      )
         return callback(null, user: 'userdata')
     return callback(new Error('Authentication failed'))
 
   onMailFrom: (address, session, callback) ->
-    if /^deny/i.test(address.address)
+    if new RegExp(config.rules.fromDeny, "i").test(address.address)
       return callback(new Error('Not accepted'))
     callback()
     return
 
   onRcptTo: (address, session, callback) ->
-    if /^deny/i.test(address.address)
+    if not new RegExp(config.rules.toAccept, "i").test(address.address)
       return callback(new Error('Not accepted'))
-
-    if address.address.toLowerCase() is 'almost-full@example.com' and Number(session.envelope.mailFrom.args.SIZE) > 100
-      err = new Error('Insufficient channel storage: ' + address.address)
-      err.responseCode = 452
-      return callback(err)
-
-    if not /sobolef.fr$/i.test(address.address)
-      return callback(new Error('Not accepted'))
-
     callback()
     return
 
@@ -59,7 +50,7 @@ server = new SMTPServer
 
     stream.on 'end', ->
       if stream.sizeExceeded
-        err = new Error('Error: message exceeds fixed maximum message size 25 MB')
+        err = new Error('Error: message exceeds fixed maximum size 25 MB')
         err.responseCode = 552
         return callback(err)
       callback(null, 'Message queued as abcdef')
@@ -69,4 +60,4 @@ server.on 'error', (err) ->
   console.error('Error occurred')
   console.error(err)
 
-server.listen(SERVER_PORT, SERVER_HOST)
+server.listen(config.server.port, config.server.host)

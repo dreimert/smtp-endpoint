@@ -1,0 +1,25 @@
+{
+  "server": {
+    "port": 2525,
+    "host": "0.0.0.0"
+  },
+  "rules": {
+    "fromDeny": "^deny",
+    "toAccept": "domaine.com$"
+  },
+  "test": {
+    "mail": {
+      "from": "\"SenderMan 👥\" <sender.man@domaine.com>",
+      "to": "test@domaine.com",
+      "subject": "Hello ✔",
+      "text": "Hello world 🐴",
+      "html": "<b>Hello world 🐴</b>"
+    },
+    "user": {
+      "name": "TestMan",
+      "email": "testman@domaine.com",
+      "login": "testuser",
+      "password":"testpass"
+    }
+  }
+}
